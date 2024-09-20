@@ -97,3 +97,8 @@ class Assignment(db.Model):
         return cls.filter(
             cls.state.in_([AssignmentStateEnum.SUBMITTED, AssignmentStateEnum.GRADED])
         ).all()
+
+    # Add a method to help us debug
+    @classmethod
+    def get_all_assignments(cls):
+        return cls.query.all()
