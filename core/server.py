@@ -8,11 +8,12 @@ from werkzeug.exceptions import HTTPException
 
 from sqlalchemy.exc import IntegrityError
 
-# from principal.assignments import principal_assignments_resources
+from core.apis.teachers import principal_teachers_resources
 
 app.register_blueprint(student_assignments_resources, url_prefix='/student')
 app.register_blueprint(teacher_assignments_resources, url_prefix='/teacher')
 app.register_blueprint(principal_assignments_resources, url_prefix='/principal')
+app.register_blueprint(principal_teachers_resources, url_prefix='/principal')
 
 
 @app.route('/')
