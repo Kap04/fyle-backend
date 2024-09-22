@@ -1,4 +1,6 @@
 from core.models.assignments import AssignmentStateEnum, GradeEnum
+import pytest
+
 
 
 def test_get_assignments(client, h_principal):
@@ -60,3 +62,90 @@ def test_regrade_assignment(client, h_principal):
 
     assert response.json['data']['state'] == AssignmentStateEnum.GRADED.value
     assert response.json['data']['grade'] == GradeEnum.B
+
+def test_grade_submitted_assignment(client, h_principal):
+    """Test grading a submitted assignment"""
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 3,  # Assuming this is a submitted assignment
+            'grade': GradeEnum.B.value
+        },
+        headers=h_principal
+    )
+
+    assert response.status_code == 200
+    assert response.json['data']['state'] == AssignmentStateEnum.GRADED.value
+    assert response.json['data']['grade'] == GradeEnum.B.value
+
+def test_grade_assignment_invalid_grade(client, h_principal):
+    """Test grading with an invalid grade"""
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 3,
+            'grade': 'INVALID_GRADE'
+        },
+        headers=h_principal
+    )
+
+    assert response.status_code == 400
+    assert 'error' in response.json
+    assert response.json['error'] == 'ValidationError'
+
+def test_grade_nonexistent_assignment(client, h_principal):
+    """Test grading a nonexistent assignment"""
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 9999,  # Assuming this ID doesn't exist
+            'grade': GradeEnum.A.value
+        },
+        headers=h_principal
+    )
+
+    assert response.status_code == 404
+    assert 'error' in response.json
+    assert response.json['error'] == 'FyleError'
+
+def test_grade_already_graded_assignment(client, h_principal):
+    """Test grading an already graded assignment"""
+    # First, grade an assignment
+    client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 4,
+            'grade': GradeEnum.C.value
+        },
+        headers=h_principal
+    )
+
+    # Then, try to grade it again
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 4,
+            'grade': GradeEnum.A.value
+        },
+        headers=h_principal
+    )
+
+    assert response.status_code == 200
+    assert response.json['data']['state'] == AssignmentStateEnum.GRADED.value
+    assert response.json['data']['grade'] == GradeEnum.A.value
+
+@pytest.mark.parametrize("grade", list(GradeEnum))
+def test_grade_assignment_all_grades(client, h_principal, grade):
+    """Test grading with all possible grades"""
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 3,  # Assuming this is a valid assignment ID
+            'grade': grade.value
+        },
+        headers=h_principal
+    )
+
+    assert response.status_code == 200
+    assert response.json['data']['state'] == AssignmentStateEnum.GRADED.value
+    assert response.json['data']['grade'] == grade.value
