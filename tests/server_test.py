@@ -65,12 +65,10 @@ def test_unhandled_exception(client):
         client.get('/test-unhandled-exception')
 
 def test_main_not_called(monkeypatch):
-    # This test ensures that app.run() is not called when the script is imported
+    
     mock_run = monkeypatch.Mock()
     monkeypatch.setattr(app, 'run', mock_run)
     
-    # Simulate importing the script
     exec(open('core/server.py').read())
-    
-    # Check that app.run() was not called
+
     mock_run.assert_not_called()
