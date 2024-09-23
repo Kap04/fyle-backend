@@ -1,7 +1,7 @@
 from flask import jsonify
 from marshmallow.exceptions import ValidationError
 from core import app
-from core.apis.assignments import student_assignments_resources, teacher_assignments_resources,principal_assignments_resources
+from core.apis.assignments import student_assignments_resources, teacher_assignments_resources, principal_assignments_resources
 from core.libs import helpers
 from core.libs.exceptions import FyleError
 from werkzeug.exceptions import HTTPException
@@ -46,3 +46,6 @@ def handle_error(err):
         ), err.code
 
     raise err
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
