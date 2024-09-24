@@ -85,9 +85,13 @@ def test_get_grade_A_assignments_for_teacher_with_max_grading():
     print("Initial state:")
     print_debug_info()
 
-    # Create and grade 5 assignments for the default teacher (teacher_id=1)
-    grade_a_count_1 = create_n_graded_assignments_for_teacher(5)
+    # Create and grade 5 assignments for teacher 1
+    grade_a_count_1 = create_n_graded_assignments_for_teacher(5, teacher_id=1)
     print(f"Created {grade_a_count_1} grade A assignments for teacher 1")
+
+    # Create fewer grade A assignments for teacher 2 to ensure teacher 1 has the max
+    grade_a_count_2 = create_n_graded_assignments_for_teacher(3, teacher_id=2)
+    print(f"Created {grade_a_count_2} grade A assignments for teacher 2")
 
     # Print state after creating assignments
     print("After creating assignments:")
@@ -100,7 +104,9 @@ def test_get_grade_A_assignments_for_teacher_with_max_grading():
     # Execute the SQL query and check if the count matches the created assignments
     sql_result = db.session.execute(text(sql)).fetchall()
     print(f"SQL query result: {sql_result}")
-    assert grade_a_count_1 == sql_result[0][1]  # Note: changed to [0][1] to match our query output
+    assert len(sql_result) == 1, "Expected exactly one result"
+    assert sql_result[0][0] == 1, "Expected teacher_id to be 1"
+    assert sql_result[0][1] == grade_a_count_1, f"Expected {grade_a_count_1} grade A assignments, got {sql_result[0][1]}"
 
 def print_debug_info():
     all_assignments = Assignment.get_all_assignments()

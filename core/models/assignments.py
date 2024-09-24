@@ -2,9 +2,11 @@ import enum
 from core import db
 from core.apis.decorators import AuthPrincipal
 from core.libs import helpers, assertions
+from core.libs.exceptions import FyleError
 from core.models.teachers import Teacher
 from core.models.students import Student
 from sqlalchemy.types import Enum as BaseEnum
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class GradeEnum(str, enum.Enum):
@@ -44,45 +46,64 @@ class Assignment(db.Model):
         return cls.filter(cls.id == _id).first()
 
     @classmethod
-    def upsert(cls, assignment_new: 'Assignment'):
-        if assignment_new.id is not None:
-            assignment = Assignment.get_by_id(assignment_new.id)
-            assertions.assert_found(assignment, 'No assignment with this id was found')
-            assertions.assert_valid(assignment.state == AssignmentStateEnum.DRAFT,
-                                    'only assignment in draft state can be edited')
+    def upsert(cls, assignment_data):
+        try:
+            if assignment_data.id:
+                assignment = cls.query.get(assignment_data.id)
+                if assignment and assignment.state != AssignmentStateEnum.DRAFT:
+                    raise FyleError(error_message="only assignment in draft state can be edited")
+            else:
+                assignment = cls()
 
-            assignment.content = assignment_new.content
-        else:
-            assignment = assignment_new
-            db.session.add(assignment_new)
+            for key, value in assignment_data.__dict__.items():
+                if hasattr(assignment, key):
+                    setattr(assignment, key, value)
 
-        db.session.flush()
-        return assignment
-
-    @classmethod
-    def submit(cls, _id, teacher_id, auth_principal: AuthPrincipal):
-        assignment = Assignment.get_by_id(_id)
-        assertions.assert_found(assignment, 'No assignment with this id was found')
-        assertions.assert_valid(assignment.student_id == auth_principal.student_id, 'This assignment belongs to some other student')
-        assertions.assert_valid(assignment.content is not None, 'assignment with empty content cannot be submitted')
-
-        assignment.teacher_id = teacher_id
-        db.session.flush()
-
-        return assignment
-
+            db.session.add(assignment)
+            db.session.commit()
+            return assignment
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
 
     @classmethod
-    def mark_grade(cls, _id, grade, auth_principal: AuthPrincipal):
-        assignment = Assignment.get_by_id(_id)
-        assertions.assert_found(assignment, 'No assignment with this id was found')
-        assertions.assert_valid(grade is not None, 'assignment with empty grade cannot be graded')
+    def submit(cls, _id, teacher_id, auth_principal):
+        try:
+            assignment = cls.query.get(_id)
+            if not assignment:
+                raise FyleError(error_message="Assignment not found")
+            if assignment.student_id != auth_principal.student_id:
+                raise FyleError(error_message="This assignment belongs to some other student")
+            if not assignment.content:
+                raise FyleError(error_message="assignment with empty content cannot be submitted")
+            
+            assignment.teacher_id = teacher_id
+            assignment.state = AssignmentStateEnum.SUBMITTED
+            db.session.commit()
+            return assignment
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
 
-        assignment.grade = grade
-        assignment.state = AssignmentStateEnum.GRADED
-        db.session.flush()
 
-        return assignment
+
+    @classmethod
+    def mark_grade(cls, _id, grade, auth_principal):
+        try:
+            assignment = cls.query.get(_id)
+            if not assignment:
+                raise FyleError(error_message="Assignment not found")
+            if not grade:
+                raise FyleError(error_message="assignment with empty grade cannot be graded")
+            
+            assignment.grade = grade
+            assignment.state = AssignmentStateEnum.GRADED
+            db.session.commit()
+            return assignment
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+
 
     @classmethod
     def get_assignments_by_student(cls, student_id):
