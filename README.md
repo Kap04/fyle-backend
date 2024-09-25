@@ -56,3 +56,63 @@ pytest -vvv -s tests/
 # pytest --cov
 # open htmlcov/index.html
 ```
+
+
+
+### Docker Instructions
+
+1. **Build the Docker image:**
+
+   In the project directory, run the following command to build the Docker image:
+
+   ```bash
+   docker build -t fyle-backend-challenge .
+   ```
+
+2. **Start the Application with Docker Compose:**
+
+   We recommend using Docker Compose to orchestrate the application easily.
+   If you have a `docker-compose.yml` file already set up, you can start the services by running:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   This will:
+   - Build the Docker image if necessary.
+   - Start the containerized services.
+
+   To run the containers in detached mode, use:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the Application:**
+
+   After starting the services, you can access the application by visiting the appropriate URL (e.g., `http://localhost:5000`), based on your `docker-compose.yml` configuration.
+
+4. **Running Tests inside Docker:**
+
+   You can run the tests inside the Docker container by executing:
+
+   ```bash
+   docker-compose exec app pytest -vvv -s tests/
+   ```
+
+   For test coverage:
+
+   ```bash
+   docker-compose exec app pytest --cov
+   ```
+
+5. **Shutting Down the Services:**
+
+   When you're done, stop and remove the containers by running:
+
+   ```bash
+   docker-compose down
+   ```
+
+
+

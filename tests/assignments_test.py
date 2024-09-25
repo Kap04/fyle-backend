@@ -16,13 +16,13 @@ def session():
 
 # Use this fixture in your tests
 def test_submit_assignment(session):
-    # Your test code here
+   
     def test_assignment_repr():
         assignment = Assignment(id=1, student_id=1, content="Test content")
         assert repr(assignment) == '<Assignment 1>'
 
     def test_get_all_assignments():
-        # Create some test assignments
+      
         assignment1 = Assignment(student_id=1, content="Test 1")
         assignment2 = Assignment(student_id=2, content="Test 2")
         db.session.add(assignment1)
@@ -47,7 +47,7 @@ def test_submit_assignment(session):
         assert assignment in teacher_assignments
 
     def test_get_submitted_and_graded_assignments():
-        # Create assignments in different states
+ 
         draft_assignment = Assignment(student_id=1, content="Draft", state=AssignmentStateEnum.DRAFT)
         submitted_assignment = Assignment(student_id=1, content="Submitted", state=AssignmentStateEnum.SUBMITTED)
         graded_assignment = Assignment(student_id=1, content="Graded", state=AssignmentStateEnum.GRADED)

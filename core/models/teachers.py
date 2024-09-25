@@ -9,7 +9,6 @@ class Teacher(db.Model):
     created_at = db.Column(db.TIMESTAMP(timezone=True), default=helpers.get_utc_now, nullable=False)
     updated_at = db.Column(db.TIMESTAMP(timezone=True), default=helpers.get_utc_now, nullable=False, onupdate=helpers.get_utc_now)
 
-    # Add this relationship
     assignments = db.relationship('Assignment', backref='teacher', lazy='dynamic')
 
     def __repr__(self):

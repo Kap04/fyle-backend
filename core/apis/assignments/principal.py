@@ -15,7 +15,6 @@ def list_assignments(p):
     """Returns list of all submitted and graded assignments"""
     assignments = Assignment.get_submitted_and_graded_assignments()
     
-    # Debugging information
     all_assignments = Assignment.get_all_assignments()
     print(f"Total assignments: {len(all_assignments)}")
     for assignment in all_assignments:

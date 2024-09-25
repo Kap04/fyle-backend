@@ -16,7 +16,7 @@ def create_n_graded_assignments_for_teacher(number: int = 0, teacher_id: int = 1
     Returns:
     - int: Count of assignments with grade 'A'.
     """
-    # Count the existing assignments with grade 'A' for the specified teacher
+    
     grade_a_counter: int = Assignment.filter(
         Assignment.teacher_id == teacher_id,
         Assignment.grade == GradeEnum.A

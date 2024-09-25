@@ -30,8 +30,8 @@ def test_student_timestamps():
     assert student.updated_at > original_updated_at
 
 def test_student_user_id_foreign_key():
-    with pytest.raises(Exception):  # This could be IntegrityError or similar
-        student = Student(user_id=999999)  # Assuming this user_id doesn't exist
+    with pytest.raises(Exception): 
+        student = Student(user_id=999999)  
         db.session.add(student)
         db.session.commit()
 

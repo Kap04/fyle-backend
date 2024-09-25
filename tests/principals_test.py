@@ -68,7 +68,7 @@ def test_grade_submitted_assignment(client, h_principal):
     response = client.post(
         '/principal/assignments/grade',
         json={
-            'id': 3,  # Assuming this is a submitted assignment
+            'id': 3,  
             'grade': GradeEnum.B.value
         },
         headers=h_principal
@@ -98,7 +98,7 @@ def test_grade_nonexistent_assignment(client, h_principal):
     response = client.post(
         '/principal/assignments/grade',
         json={
-            'id': 9999,  # Assuming this ID doesn't exist
+            'id': 9999,  
             'grade': GradeEnum.A.value
         },
         headers=h_principal
@@ -110,7 +110,7 @@ def test_grade_nonexistent_assignment(client, h_principal):
 
 def test_grade_already_graded_assignment(client, h_principal):
     """Test grading an already graded assignment"""
-    # First, grade an assignment
+    
     client.post(
         '/principal/assignments/grade',
         json={
@@ -120,7 +120,6 @@ def test_grade_already_graded_assignment(client, h_principal):
         headers=h_principal
     )
 
-    # Then, try to grade it again
     response = client.post(
         '/principal/assignments/grade',
         json={
@@ -140,7 +139,7 @@ def test_grade_assignment_all_grades(client, h_principal, grade):
     response = client.post(
         '/principal/assignments/grade',
         json={
-            'id': 3,  # Assuming this is a valid assignment ID
+            'id': 3,  
             'grade': grade.value
         },
         headers=h_principal
